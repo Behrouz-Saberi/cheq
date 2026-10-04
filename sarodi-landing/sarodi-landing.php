@@ -22,16 +22,28 @@ define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
  * Attributes:
  *  cta – link for every «استعلام قیمت» button (default: #slp-contact)
  *  tel – phone link (default: tel:03133120)
+ *  nav – "1" shows the landing's own top bar inside a theme page (default "0": the theme header is used)
+ *
+ * $embedded = true when rendered inside a theme page (shortcode / Elementor): the landing
+ * breaks out to full width and drops its fixed nav. The full-canvas template passes false.
  */
-function sarodi_lp_render( $atts = array() ) {
+function sarodi_lp_render( $atts = array(), $embedded = true ) {
 	$atts = shortcode_atts(
 		array(
 			'cta' => '#slp-contact',
 			'tel' => 'tel:03133120',
+			'nav' => '0',
 		),
 		$atts,
 		'sarodi_landing'
 	);
+	$cls = '';
+	if ( $embedded ) {
+		$cls .= ' slp--embed alignfull';
+		if ( '1' !== (string) $atts['nav'] ) {
+			$cls .= ' slp--nonav';
+		}
+	}
 
 	wp_enqueue_style( 'sarodi-landing', SARODI_LP_URL . 'assets/css/landing.css', array(), SARODI_LP_VER );
 
@@ -47,15 +59,21 @@ function sarodi_lp_render( $atts = array() ) {
 			'{{A}}'   => esc_url( $assets ),
 			'{{CTA}}' => esc_url( $atts['cta'] ),
 			'{{TEL}}' => esc_url( $atts['tel'], array( 'tel', 'http', 'https' ) ),
+			'{{CLS}}' => esc_attr( $cls ),
 		)
 	);
 
 	// cache-bust the ES module entry
-	$html = str_replace( '/js/main.js"', '/js/main.js?ver=' . SARODI_LP_VER . '"', $html );
+	$html = str_replace( '/js/sarodi.bundle.js"', '/js/sarodi.bundle.js?ver=' . SARODI_LP_VER . '"', $html );
 
 	return $html;
 }
-add_shortcode( 'sarodi_landing', 'sarodi_lp_render' );
+add_shortcode(
+	'sarodi_landing',
+	function ( $atts ) {
+		return sarodi_lp_render( (array) $atts, true );
+	}
+);
 
 /* Is the current request a page that shows the landing? */
 function sarodi_lp_is_landing() {
@@ -87,7 +105,7 @@ add_action(
 			return;
 		}
 		echo '<link rel="preload" href="' . esc_url( SARODI_LP_URL . 'assets/fonts/Vazirmatn-wght.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-		echo '<link rel="modulepreload" href="' . esc_url( SARODI_LP_URL . 'assets/js/main.js?ver=' . SARODI_LP_VER ) . '">' . "\n";
+		echo '<link rel="preload" href="' . esc_url( SARODI_LP_URL . 'assets/js/sarodi.bundle.js?ver=' . SARODI_LP_VER ) . '" as="script">' . "\n";
 		echo '<meta name="theme-color" content="#05090b">' . "\n";
 	},
 	1
@@ -112,7 +130,7 @@ add_filter(
 	}
 );
 
-/* Keep optimisation plugins from bundling/deferring the ES modules (breaks relative imports). */
+/* Keep optimisation plugins from re-bundling or delaying the 3D bundle (it must run on load). */
 foreach ( array( 'autoptimize_filter_js_exclude', 'litespeed_optm_js_defer_exc', 'rocket_exclude_js', 'rocket_delay_js_exclusions' ) as $sarodi_lp_hook ) {
 	add_filter(
 		$sarodi_lp_hook,

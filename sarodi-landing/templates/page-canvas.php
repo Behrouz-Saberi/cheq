@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 wp_body_open();
 while ( have_posts() ) {
 	the_post();
-	echo sarodi_lp_render(); // phpcs:ignore WordPress.Security.EscapeOutput -- trusted plugin template
+	echo sarodi_lp_render( array(), false ); // phpcs:ignore WordPress.Security.EscapeOutput -- trusted plugin template
 	// any extra blocks the editor adds below the landing still render
 	$sarodi_lp_extra = trim( get_the_content() );
 	if ( $sarodi_lp_extra && ! has_shortcode( $sarodi_lp_extra, 'sarodi_landing' ) ) {

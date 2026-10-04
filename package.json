@@ -1,0 +1,7 @@
+{
+  "name": "sarodi-landing-build",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node sarodi-landing/build.mjs" },
+  "devDependencies": { "esbuild": "0.24.0" }
+}
