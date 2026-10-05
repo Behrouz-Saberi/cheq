@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sarodi Smart Switch Landing
  * Description: لندینگ سه‌بعدی و تعاملی کلیدهای هوشمند سارودی. استفاده: شورت‌کد [sarodi_landing] یا قالب برگه «Sarodi Landing (تمام‌صفحه)».
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Imenab Digital Marketing
  * Text Domain: sarodi-landing
  * Requires PHP: 7.4
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SARODI_LP_VER', '1.0.0' );
+define( 'SARODI_LP_VER', '1.0.1' );
 define( 'SARODI_LP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
 
@@ -130,17 +130,23 @@ add_filter(
 	}
 );
 
-/* Keep optimisation plugins from re-bundling or delaying the 3D bundle (it must run on load). */
+/* Keep optimisation plugins from re-bundling or delaying the 3D bundle (it must run on load).
+   Only touches pages that show the landing; every other page (home, sliders, shop) keeps
+   the cache plugin's settings exactly as they were. */
 foreach ( array( 'autoptimize_filter_js_exclude', 'litespeed_optm_js_defer_exc', 'rocket_exclude_js', 'rocket_delay_js_exclusions' ) as $sarodi_lp_hook ) {
 	add_filter(
 		$sarodi_lp_hook,
 		function ( $excluded ) {
+			if ( ! did_action( 'wp' ) || ! sarodi_lp_is_landing() ) {
+				return $excluded;
+			}
 			$needle = 'sarodi-landing/assets/js/';
 			if ( is_string( $excluded ) ) {
-				return $excluded . ', ' . $needle;
+				return '' === trim( $excluded ) ? $needle : rtrim( $excluded, " ,\n" ) . ', ' . $needle;
 			}
-			$excluded   = (array) $excluded;
-			$excluded[] = $needle;
+			if ( is_array( $excluded ) ) {
+				$excluded[] = $needle;
+			}
 			return $excluded;
 		}
 	);
