@@ -106,7 +106,15 @@ export function initRoom({ canvas, reduced }) {
   const wtex = new THREE.CanvasTexture(wc); wtex.colorSpace = THREE.SRGBColorSpace;
   const wall = add(new THREE.BoxGeometry(0.28, 0.28, 0.014), [std(0x0b0f11, 0.1), std(0x0b0f11, 0.1), std(0x0b0f11, 0.1), std(0x0b0f11, 0.1),
     new THREE.MeshStandardMaterial({ map: wtex, emissive: 0xffffff, emissiveMap: wtex, emissiveIntensity: 1.3, roughness: 0.1 }), std(0x0b0f11)], -2.45, 1.3, -1.985);
-  const redrawWall = () => { drawFace(wc.getContext('2d'), 256, state.model, gangStates()); wtex.needsUpdate = true; };
+  const ec = document.createElement('canvas'); ec.width = ec.height = 256;
+  const etex = new THREE.CanvasTexture(ec); etex.colorSpace = THREE.SRGBColorSpace;
+  wall.material[4].emissiveMap = etex;
+  const redrawWall = () => {
+    const st = gangStates();
+    drawFace(wc.getContext('2d'), 256, state.model, st, [], state.finish, 'map'); wtex.needsUpdate = true;
+    drawFace(ec.getContext('2d'), 256, state.model, st, [], state.finish, 'emit'); etex.needsUpdate = true;
+    wall.material.forEach((m, i) => i !== 4 && m.color.set(state.finish === 'white' ? 0xdfe5e7 : 0x0b0f11));
+  };
   redrawWall();
   subscribe(redrawWall);
 

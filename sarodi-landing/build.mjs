@@ -51,7 +51,7 @@ const css = read('assets/css/landing.css').replace(/src:\s*url\("\.\.\/fonts\/Va
 let inl = fill(tpl, '__A__')
   .replace(/__A__\/img\/([\w-]+\.svg)/g, (_, f) => `data:image/svg+xml;base64,${b64('assets/img/' + f)}`);
 const safeJs = bundle.replace(/<\/script/gi, '<\\/script').replace(/<!--/g, '<\\!--');
-inl = inl.replace(/<script defer src="__A__\/js\/sarodi\.bundle\.js"><\/script>/, `<script>${safeJs}</script>`);
+inl = inl.replace(/<script defer src="__A__\/js\/sarodi\.bundle\.js"><\/script>/, () => `<script>${safeJs}</script>`); // function form: bundle text may contain $' / $& patterns
 if (inl.includes('__A__')) throw new Error('unresolved asset path in single-file build');
 const singleBody = `<style>${css}</style>\n${inl}`;
 

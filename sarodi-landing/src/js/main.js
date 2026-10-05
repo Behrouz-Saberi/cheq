@@ -1,6 +1,6 @@
 import { faceSVG } from './face.js';
 import {
-  MODELS, SCENES, LIGHT_NAMES, state, subscribe, setModel, pressGang, gangStates, gangLegend,
+  MODELS, SCENES, LIGHT_NAMES, state, subscribe, setModel, setFinish, pressGang, gangStates, gangLegend,
   setLight, setCurtain, setCooler, applyScene, tickCurtain, fa,
 } from './store.js';
 
@@ -143,7 +143,14 @@ function boot() {
   }
   const ensureMotor = () => { if (!motorRaf && Math.abs(state.curtain.target - state.curtain.pos) > 0.002) { motorLast = performance.now(); motorRaf = requestAnimationFrame(motor); } };
 
-  function syncAll() { syncPanel(); syncTabs(); syncStatus(); syncWiring(); syncAmbient(); renderApp(); }
+  /* ---------- panel colour (black / white) ---------- */
+  root.addEventListener('click', e => { const b = e.target.closest('[data-finish]'); if (b) setFinish(b.dataset.finish); });
+  function syncFinish() {
+    root.classList.toggle('slp-fin-white', state.finish === 'white');
+    $$('[data-finish]').forEach(b => b.setAttribute('aria-checked', b.dataset.finish === state.finish));
+  }
+
+  function syncAll() { syncFinish(); syncPanel(); syncTabs(); syncStatus(); syncWiring(); syncAmbient(); renderApp(); }
   subscribe((s, src) => {
     syncAll(); ensureMotor();
     if (src === 'scene' || (src === 'panel' && MODELS[s.model].kind === 'scene')) toast(`سناریوی «${SCENES[s.scene]?.name}» اجرا شد`);

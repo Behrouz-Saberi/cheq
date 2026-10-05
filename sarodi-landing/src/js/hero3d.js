@@ -2,7 +2,7 @@ import * as THREE from '../vendor/three.module.min.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
 import { PANEL_SIZE, PANEL_LOGO, PANEL_GANGS } from './panels.js';
 import { drawFace, zoneOf } from './face.js';
-import { state, subscribe, gangStates, pressGang, setModel, MODELS } from './store.js';
+import { state, subscribe, gangStates, pressGang, MODELS } from './store.js';
 
 const MM = 0.01;               // 1 scene unit = 100 mm, panel = 0.86
 const PANEL = 86;
@@ -64,16 +64,25 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   faceTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   faceTex.repeat.set(1 / (PANEL * MM), 1 / (PANEL * MM));
   faceTex.offset.set(0.5, 0.5);
+  const emitCanvas = document.createElement('canvas'); emitCanvas.width = emitCanvas.height = TEX;
+  const ectx = emitCanvas.getContext('2d');
+  const emitTex = new THREE.CanvasTexture(emitCanvas);
+  emitTex.colorSpace = THREE.SRGBColorSpace;
+  emitTex.repeat.copy(faceTex.repeat); emitTex.offset.copy(faceTex.offset);
 
-  let shownModel = state.model;
+  let shownModel = state.model, shownFinish = state.finish;
   const pulse = [0, 0, 0, 0];
-  const redraw = () => { drawFace(fctx, TEX, shownModel, gangStates(shownModel), pulse); faceTex.needsUpdate = true; };
+  const redraw = () => {
+    const st = gangStates(shownModel);
+    drawFace(fctx, TEX, shownModel, st, pulse, shownFinish, 'map'); faceTex.needsUpdate = true;
+    drawFace(ectx, TEX, shownModel, st, pulse, shownFinish, 'emit'); emitTex.needsUpdate = true;
+  };
 
   /* ---------- product layers ---------- */
   const product = new THREE.Group(); scene.add(product);
 
   const glassFace = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, map: faceTex, emissive: 0xffffff, emissiveMap: faceTex, emissiveIntensity: 1.15,
+    color: 0xffffff, map: faceTex, emissive: 0xffffff, emissiveMap: emitTex, emissiveIntensity: 1.15,
     roughness: 0.08, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, ior: 1.52, reflectivity: 0.7,
   });
   const glassEdge = new THREE.MeshPhysicalMaterial({ color: 0x0c1215, roughness: 0.05, metalness: 0.1, clearcoat: 1, transmission: 0.25, thickness: 0.02 });
@@ -99,7 +108,17 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(4 * MM, 4 * MM, 10 * MM, 20), new THREE.MeshStandardMaterial({ color: 0x222831, roughness: 0.35 }));
   cap.rotation.x = Math.PI / 2; cap.position.set(24 * MM, -20 * MM, 5 * MM); relay.add(cap);
 
-  const bezel = slab(86, 86, 6, 4, 0.4, new THREE.MeshStandardMaterial({ color: 0x15191b, roughness: 0.32, metalness: 0.75 }), [72, 72, 4]);
+  const bezelMat = new THREE.MeshStandardMaterial({ color: 0x15191b, roughness: 0.32, metalness: 0.75 });
+  const bezel = slab(86, 86, 6, 4, 0.4, bezelMat, [72, 72, 4]);
+  function applyFinish(f) {
+    const w = f === 'white';
+    glassEdge.color.set(w ? 0xdfe5e7 : 0x0c1215);
+    glassEdge.transmission = w ? 0 : 0.25;
+    glassFace.roughness = w ? 0.14 : 0.08;
+    glassFace.emissiveIntensity = w ? 1.4 : 1.15;
+    bezelMat.color.set(w ? 0xe4e8e9 : 0x15191b); bezelMat.metalness = w ? 0.1 : 0.75; bezelMat.roughness = w ? 0.45 : 0.32;
+  }
+  applyFinish(shownFinish);
 
   const housing = new THREE.Group();
   housing.add(slab(64, 64, 6, 24, 1, new THREE.MeshStandardMaterial({ color: 0xe3e7e9, roughness: 0.55 })));
@@ -239,16 +258,24 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   canvas.addEventListener('pointerleave', () => { pointer.tx = 0; pointer.ty = 0; });
 
   /* ---------- model flip ---------- */
-  let flipping = false, flipT = 0, pendingModel = null, flipFrom = 0;
-  function showModel(m) {
-    if (m === shownModel && !pendingModel) return;
-    if (reduced) { shownModel = m; buildPads(m); drawLabel(m); redraw(); return; }
-    pendingModel = m; if (!flipping) { flipping = true; flipT = 0; }
+  let flipping = false, flipT = 0, pendingModel = null, pendingFinish = null, flipFrom = 0;
+  function swapNow() {
+    if (pendingModel) { shownModel = pendingModel; buildPads(shownModel); drawLabel(shownModel); if (storyModelEl) storyModelEl.textContent = MODELS[shownModel].name; }
+    if (pendingFinish) { shownFinish = pendingFinish; applyFinish(shownFinish); }
+    pendingModel = pendingFinish = null; redraw();
+  }
+  function showModel(m, f = shownFinish) {
+    if (m === shownModel && f === shownFinish && !pendingModel && !pendingFinish) return;
+    if (m !== shownModel) pendingModel = m;
+    if (f !== shownFinish) pendingFinish = f;
+    if (reduced) { swapNow(); return; }
+    if (!flipping) { flipping = true; flipT = 0; }
   }
 
   let storyAuto = false, storyIdx = 2, storyClock = 0, lastQ = 0;
   subscribe((s, src) => {
-    if (s.model !== shownModel && !storyAuto) showModel(s.model);
+    if (s.finish !== shownFinish && s.finish !== pendingFinish) showModel(storyAuto ? (pendingModel || shownModel) : s.model, s.finish);
+    else if (s.model !== shownModel && !storyAuto) showModel(s.model);
     if (src !== 'motor' || MODELS[shownModel].kind === 'curtain') redraw();
   });
 
@@ -283,8 +310,8 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
       flipT = Math.min(1, flipT + dt / 0.75);
       const fe = flipT < 0.5 ? 2 * flipT * flipT : 1 - Math.pow(-2 * flipT + 2, 2) / 2;
       flipFrom = fe * Math.PI * 2;
-      if (pendingModel && fe >= 0.25) { shownModel = pendingModel; pendingModel = null; buildPads(shownModel); drawLabel(shownModel); redraw(); if (storyModelEl) storyModelEl.textContent = MODELS[shownModel].name; }
-      if (flipT >= 1) { flipping = false; flipFrom = 0; if (pendingModel) { flipping = true; flipT = 0; } }
+      if ((pendingModel || pendingFinish) && fe >= 0.25 && fe < 0.75) swapNow();
+      if (flipT >= 1) { flipping = false; flipFrom = 0; if (pendingModel || pendingFinish) { flipping = true; flipT = 0; } }
     }
     product.rotation.set(rx, ry + flipFrom, 0);
     product.scale.setScalar(p.s);

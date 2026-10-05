@@ -43,13 +43,14 @@
         <div class="slp-hero__copy" data-reveal>
           <p class="slp-eyebrow">کلید هوشمند لمسی سارودی</p>
           <h1 class="slp-h1">خانه، با یک لمس<br><span class="slp-grad">هوشمند</span> می‌شود</h1>
-          <p class="slp-lead">پنل شیشه‌ای مشکی، کنترل از موبایل در هر جای دنیا و سناریوهایی که خانه را با شما هماهنگ می‌کند.</p>
+          <p class="slp-lead">پنل شیشه‌ای مشکی یا سفید، کنترل از موبایل در هر جای دنیا و سناریوهایی که خانه را با شما هماهنگ می‌کند.</p>
           <div class="slp-hero__ctas">
             <a class="slp-btn" href="{{CTA}}" data-cta>استعلام قیمت</a>
             <a class="slp-btn slp-btn--ghost" href="#slp-demo">امتحانش کن</a>
           </div>
         </div>
-        <div class="slp-hero__models" role="radiogroup" aria-label="انتخاب مدل در نمای سه‌بعدی" data-hero-models>
+        <div class="slp-hero__models" data-hero-models>
+          <div class="slp-seg" role="radiogroup" aria-label="انتخاب مدل در نمای سه‌بعدی">
           <button type="button" role="radio" data-model="g1">۱ پل</button>
           <button type="button" role="radio" data-model="g2">۲ پل</button>
           <button type="button" role="radio" data-model="g3" aria-checked="true">۳ پل</button>
@@ -57,13 +58,19 @@
           <button type="button" role="radio" data-model="curtainB">پرده</button>
           <button type="button" role="radio" data-model="cooler">کولر</button>
         </div>
+          <span class="slp-hero__sep" aria-hidden="true"></span>
+          <div class="slp-seg slp-seg--fin" role="radiogroup" aria-label="رنگ پنل">
+          <button type="button" role="radio" class="slp-swatch slp-swatch--icon" data-finish="black" aria-checked="true" aria-label="پنل مشکی" title="مشکی"><i class="slp-swatch__dot slp-swatch__dot--black"></i><span>مشکی</span></button>
+          <button type="button" role="radio" class="slp-swatch slp-swatch--icon" data-finish="white" aria-checked="false" aria-label="پنل سفید" title="سفید"><i class="slp-swatch__dot slp-swatch__dot--white"></i><span>سفید</span></button>
+          </div>
+        </div>
       </div>
 
       <!-- STORY STEPS -->
       <div class="slp-step" id="slp-story" data-step="0">
         <div class="slp-step__card">
           <h2 class="slp-h2">شیشه‌ای یکپارچه، بدون دکمهٔ فیزیکی</h2>
-          <p>سطحی صاف و براق با آیکن‌های نورانی. لمس کنید تا چراغ روشن شود؛ نور آیکن، وضعیت را در تاریکی هم نشان می‌دهد.</p>
+          <p>سطحی صاف و براق با آیکن‌های نورانی، در دو رنگ مشکی و سفید. لمس کنید تا چراغ روشن شود؛ نور آیکن، وضعیت را در تاریکی هم نشان می‌دهد.</p>
         </div>
       </div>
       <div class="slp-step" data-step="1">
@@ -97,6 +104,7 @@
         <p class="slp-sub">یک مدل انتخاب کن و روی کلید بزن. خانه پاسخ می‌دهد.</p>
       </div>
 
+      <div class="slp-demo__ctrls">
       <div class="slp-tabs" role="tablist" aria-label="مدل کلید" data-demo-tabs>
         <button type="button" role="tab" data-model="g1">۱ پل</button>
         <button type="button" role="tab" data-model="g2">۲ پل</button>
@@ -105,6 +113,11 @@
         <button type="button" role="tab" data-model="scene">سناریو</button>
         <button type="button" role="tab" data-model="curtainA">پرده</button>
         <button type="button" role="tab" data-model="cooler">کولر</button>
+      </div>
+        <div class="slp-finish" role="radiogroup" aria-label="رنگ پنل">
+          <button type="button" role="radio" class="slp-swatch" data-finish="black" aria-checked="true" aria-label="پنل مشکی" title="مشکی"><i class="slp-swatch__dot slp-swatch__dot--black"></i><span>مشکی</span></button>
+          <button type="button" role="radio" class="slp-swatch" data-finish="white" aria-checked="false" aria-label="پنل سفید" title="سفید"><i class="slp-swatch__dot slp-swatch__dot--white"></i><span>سفید</span></button>
+        </div>
       </div>
 
       <div class="slp-demo__grid">
@@ -132,7 +145,11 @@
     <div class="slp-wrap">
       <div class="slp-family__head" data-reveal>
         <h2 class="slp-h2">خانوادهٔ کلیدهای هوشمند سارودی</h2>
-        <p class="slp-sub">شش مدل با یک زبان طراحی. روی هر کارت بزن تا در دمو امتحانش کنی.</p>
+        <p class="slp-sub">شش مدل با یک زبان طراحی، در دو رنگ مشکی و سفید. روی هر کارت بزن تا در دمو امتحانش کنی.</p>
+        <div class="slp-finish slp-finish--family" role="radiogroup" aria-label="رنگ پنل">
+          <button type="button" role="radio" class="slp-swatch" data-finish="black" aria-checked="true" aria-label="پنل مشکی" title="مشکی"><i class="slp-swatch__dot slp-swatch__dot--black"></i><span>مشکی</span></button>
+          <button type="button" role="radio" class="slp-swatch" data-finish="white" aria-checked="false" aria-label="پنل سفید" title="سفید"><i class="slp-swatch__dot slp-swatch__dot--white"></i><span>سفید</span></button>
+        </div>
       </div>
     </div>
     <div class="slp-rail" data-rail tabindex="0" aria-label="فهرست محصولات؛ به چپ و راست بکشید">
@@ -263,6 +280,10 @@
           <p>بله. ترمینال N روی همهٔ مدل‌ها وجود دارد و ماژول وای‌فای برای روشن ماندن دائمی به نول نیاز دارد.</p>
         </details>
         <details data-reveal>
+          <summary>کلیدهای سارودی در چه رنگ‌هایی عرضه می‌شوند؟</summary>
+          <p>در دو رنگ مشکی و سفید، با همان آیکن‌های نورانی و ابعاد ۸۶×۸۶ میلی‌متر برای همهٔ مدل‌ها.</p>
+        </details>
+        <details data-reveal>
           <summary>کلید با چه شبکه‌ای کار می‌کند؟</summary>
           <p>با وای‌فای ۲٫۴ گیگاهرتز استاندارد IEEE 802.11 b/g/n. شبکهٔ ۵ گیگاهرتز پشتیبانی نمی‌شود.</p>
         </details>
@@ -321,9 +342,10 @@
   {"@context":"https://schema.org","@graph":[
    {"@type":"Product","name":"کلید هوشمند لمسی سارودی","brand":{"@type":"Brand","name":"Sarodi"},"manufacturer":{"@type":"Organization","name":"Imenab","url":"https://imenabco.com"},
     "description":"کلید هوشمند وای‌فای با پنل شیشه‌ای لمسی ۸۶×۸۶ میلی‌متر، ۲۲۰ ولت، تا ۲۲۰۰ وات برای هر پل، در مدل‌های یک تا چهار پل، پرده برقی و کولر آبی.",
-    "category":"Smart Home > Smart Switch","sku":"LXSW101","model":["LXSW101","LXSW102","LXSW103","LXSW104","LXSW105","LXSW106"]},
+    "category":"Smart Home > Smart Switch","color":["مشکی","سفید"],"sku":"LXSW101","model":["LXSW101","LXSW102","LXSW103","LXSW104","LXSW105","LXSW106"]},
    {"@type":"FAQPage","mainEntity":[
     {"@type":"Question","name":"آیا برای نصب کلید هوشمند سارودی سیم نول لازم است؟","acceptedAnswer":{"@type":"Answer","text":"بله. ترمینال N روی همهٔ مدل‌ها وجود دارد و ماژول وای‌فای برای روشن ماندن دائمی به نول نیاز دارد."}},
+    {"@type":"Question","name":"کلیدهای سارودی در چه رنگ‌هایی عرضه می‌شوند؟","acceptedAnswer":{"@type":"Answer","text":"در دو رنگ مشکی و سفید، با همان آیکن‌های نورانی و ابعاد ۸۶×۸۶ میلی‌متر برای همهٔ مدل‌ها."}},
     {"@type":"Question","name":"کلید با چه شبکه‌ای کار می‌کند؟","acceptedAnswer":{"@type":"Answer","text":"با وای‌فای ۲٫۴ گیگاهرتز استاندارد IEEE 802.11 b/g/n. شبکهٔ ۵ گیگاهرتز پشتیبانی نمی‌شود."}},
     {"@type":"Question","name":"اگر اینترنت قطع شود چه اتفاقی می‌افتد؟","acceptedAnswer":{"@type":"Answer","text":"لمس پنل همچنان چراغ‌ها را روشن و خاموش می‌کند. کنترل از راه دور با برگشت اینترنت دوباره فعال می‌شود."}},
     {"@type":"Question","name":"هر پل چه مقدار بار را تحمل می‌کند؟","acceptedAnswer":{"@type":"Answer","text":"هر پل تا ۲۲۰۰ وات در ولتاژ ۲۲۰ ولت ۵۰ هرتز."}},

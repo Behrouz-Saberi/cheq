@@ -39,6 +39,7 @@ export function gangLegend(model) {
 const listeners = new Set();
 export const state = {
   model: 'g3',
+  finish: 'black',                  // panel colour: 'black' | 'white'
   lights: [false, false, false, false],
   curtain: { pos: 1, target: 1 },   // 0 = open, 1 = closed
   cooler: { pump: false, speed: 0 }, // speed: 0 off, 1 low, 2 high
@@ -52,6 +53,13 @@ function emit(source) { for (const fn of listeners) fn(state, source); }
 export function setModel(model, source = 'ui') {
   if (!MODELS[model] || state.model === model) return;
   state.model = model;
+  emit(source);
+}
+
+export const FINISHES = { black: 'مشکی', white: 'سفید' };
+export function setFinish(f, source = 'ui') {
+  if (!FINISHES[f] || state.finish === f) return;
+  state.finish = f;
   emit(source);
 }
 

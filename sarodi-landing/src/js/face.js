@@ -40,28 +40,36 @@ export function faceSVG(model, states = [], { zones = false, labels = [] } = {})
 const cache = new Map();
 const p2d = d => { if (!cache.has(d)) cache.set(d, new Path2D(d)); return cache.get(d); };
 
-export function drawFace(ctx, size, model, states = [], pulse = []) {
-  const k = size / PANEL_SIZE;
+/* layer 'map' = what the glass looks like; layer 'emit' = only the light it gives off.
+   Black glass: both are the same picture (black emits nothing). White glass: the white
+   surface must not glow, so only lit icons go into the emissive layer. */
+export function drawFace(ctx, size, model, states = [], pulse = [], finish = 'black', layer = 'map') {
+  const k = size / PANEL_SIZE, white = finish === 'white', emitOnly = white && layer === 'emit';
   ctx.save();
-  ctx.fillStyle = '#000';
+  if (white && !emitOnly) {
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0, '#fbfcfc'); g.addColorStop(1, '#e3e8ea');
+    ctx.fillStyle = g;
+  } else ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, size, size);
   ctx.scale(k, k);
-  ctx.fillStyle = 'rgba(235,245,248,.55)';
-  ctx.fill(p2d(PANEL_LOGO));
+  if (!emitOnly) { ctx.fillStyle = white ? 'rgba(55,64,68,.62)' : 'rgba(235,245,248,.55)'; ctx.fill(p2d(PANEL_LOGO)); }
   PANEL_GANGS[model].forEach((g, i) => {
     const on = !!states[i];
     const pz = pulse[i] || 0;
+    if (emitOnly && !on && pz <= 0) return;
     if (on || pz > 0) {
       const r = 26 + pz * 30;
       const grd = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, r);
-      grd.addColorStop(0, `rgba(60,200,230,${0.32 * (on ? 1 : pz)})`);
+      grd.addColorStop(0, white ? `rgba(0,150,185,${(emitOnly ? 0.45 : 0.2) * (on ? 1 : pz)})` : `rgba(60,200,230,${0.32 * (on ? 1 : pz)})`);
       grd.addColorStop(1, 'rgba(60,200,230,0)');
       ctx.fillStyle = grd;
       ctx.beginPath(); ctx.arc(g.x, g.y, r, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.shadowColor = on ? 'rgba(90,220,245,.95)' : 'transparent';
+    if (emitOnly && !on) return;
+    ctx.shadowColor = on ? (white ? 'rgba(0,170,205,.9)' : 'rgba(90,220,245,.95)') : 'transparent';
     ctx.shadowBlur = on ? 6 * k : 0;
-    const col = on ? '#d9fbff' : 'rgba(200,214,218,.62)';
+    const col = on ? (white ? (emitOnly ? '#6fe0f5' : '#0098b8') : '#d9fbff') : (white ? 'rgba(62,72,77,.72)' : 'rgba(200,214,218,.62)');
     ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1;
     if (g.fill) ctx.fill(p2d(g.fill));
     if (g.stroke) ctx.stroke(p2d(g.stroke));
