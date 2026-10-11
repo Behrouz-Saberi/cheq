@@ -1,4 +1,5 @@
 import { faceSVG } from './face.js';
+import { initMotion } from './motion.js';
 import {
   MODELS, SCENES, LIGHT_NAMES, state, subscribe, setModel, setFinish, pressGang, gangStates, gangLegend,
   setLight, setCurtain, setCooler, applyScene, tickCurtain, fa,
@@ -164,7 +165,7 @@ function boot() {
     const M = MODELS[m];
     const demoStates = m === 'g1' ? [true] : m === 'g4' ? [true, false, false, true] : m === 'cooler' ? [true, false, true] : [false, true, false];
     return `<li class="slp-card" data-reveal>
-      <button type="button" class="slp-card__btn" data-try="${m}" aria-label="امتحان ${M.name} در دمو">
+      <button type="button" class="slp-card__btn slp-spot" data-try="${m}" aria-label="امتحان ${M.name} در دمو">
         <div class="slp-card__stage"><div class="slp-glass slp-glass--card">${faceSVG(m, demoStates)}</div></div>
         <div class="slp-card__meta"><b>${M.name}</b><span dir="ltr">${M.code}</span></div>
         <div class="slp-card__terms" dir="ltr">${M.terms.map(t => `<i>${t}</i>`).join('')}</div>
@@ -174,7 +175,7 @@ function boot() {
   rail.addEventListener('click', e => {
     const b = e.target.closest('[data-try]'); if (!b) return;
     setModel(b.dataset.try, 'rail');
-    $('#slp-demo').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    motion ? motion.scrollToEl($('#slp-demo')) : $('#slp-demo').scrollIntoView({ block: 'start' });
   });
   const railStep = dir => rail.scrollBy({ left: dir * Math.min(360, rail.clientWidth * 0.8), behavior: reduced ? 'auto' : 'smooth' });
   $('[data-rail-prev]').addEventListener('click', () => railStep(1));
@@ -201,6 +202,10 @@ function boot() {
   const nav = $('[data-nav]');
   new IntersectionObserver(([en]) => nav.classList.toggle('is-solid', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.slp-hero__copy'));
 
+  /* ---------- scroll + motion (Lenis, ScrollTrigger) ---------- */
+  let motion = null;
+  try { motion = initMotion(root, { reduced }); } catch (err) { console.warn('[sarodi] motion disabled', err); }
+
   /* ---------- WebGL (lazy) ---------- */
   const glOK = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
   const stage = $('[data-stage]');
@@ -209,7 +214,8 @@ function boot() {
       m.initHero({
         canvas: $('[data-hero-canvas]'), stage, scrolly: $('[data-scrolly]'), labelsEl: $('[data-layer-labels]'),
         hintEl: $('[data-hint]'), storyModelEl: $('[data-story-model]'), reduced,
-        onFirstFrame: () => stage.classList.add('is-3d'),
+        onFirstFrame: () => { stage.classList.add('is-3d'); motion && motion.refresh(); },
+        getProgress: motion ? motion.getProgress : null,
       });
     }).catch(err => { console.warn('[sarodi] hero 3D disabled', err); stage.classList.add('is-static'); });
     ('requestIdleCallback' in window) ? requestIdleCallback(loadHero, { timeout: 600 }) : setTimeout(loadHero, 120);

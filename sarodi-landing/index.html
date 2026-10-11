@@ -36,6 +36,7 @@
   <section class="slp-scrolly" id="slp-top" data-scrolly>
     <div class="slp-stage" data-stage>
       <div class="slp-stage__glow" aria-hidden="true"></div>
+      <div class="slp-stage__bar" aria-hidden="true"><i data-story-bar></i></div>
       <!-- static fallback / pre-load poster: real panel vectors -->
       <div class="slp-stage__poster" data-poster aria-hidden="true">
         <div class="slp-glass slp-glass--hero" data-panel-face="g3"></div>
@@ -107,6 +108,9 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== SPEC BAND (single marquee on the page) ===== -->
+  <div class="slp-band" aria-hidden="true"><div class="slp-band__track"><span>کنترل از هر جای دنیا</span><i></i><span>Wi-Fi 2.4GHz</span><i></i><span>۲۲۰۰ وات برای هر پل</span><i></i><span>شیشهٔ مشکی و سفید</span><i></i><span>سناریوی هوشمند</span><i></i><span>زمان‌بندی</span><i></i><span>۸۶×۸۶ میلی‌متر</span><i></i><span>پرده و کولر آبی</span><i></i><span>کنترل از هر جای دنیا</span><i></i><span>Wi-Fi 2.4GHz</span><i></i><span>۲۲۰۰ وات برای هر پل</span><i></i><span>شیشهٔ مشکی و سفید</span><i></i><span>سناریوی هوشمند</span><i></i><span>زمان‌بندی</span><i></i><span>۸۶×۸۶ میلی‌متر</span><i></i><span>پرده و کولر آبی</span><i></i></div></div>
 
   <!-- ===== INTERACTIVE ROOM DEMO ===== -->
   <section class="slp-demo slp-sec" id="slp-demo">
@@ -209,32 +213,32 @@
     <div class="slp-wrap">
       <h2 class="slp-h2" data-reveal>مشخصات فنی</h2>
       <div class="slp-bento">
-        <div class="slp-bento__c slp-bento__c--hero" data-reveal>
-          <span class="slp-num">۲۲۰۰<small>وات</small></span>
+        <div class="slp-spot slp-bento__c slp-bento__c--hero" data-reveal>
+          <span class="slp-num"><span data-count="2200">۲۲۰۰</span><small>وات</small></span>
           <b>توان خروجی هر پل</b>
           <span>برای روشنایی، پرده و کولر خانگی.</span>
           <div class="slp-bento__wave" aria-hidden="true"></div>
         </div>
-        <div class="slp-bento__c slp-bento__c--wifi" data-reveal>
+        <div class="slp-spot slp-bento__c slp-bento__c--wifi" data-reveal>
           <span class="slp-num" dir="ltr">Wi-Fi 2.4<small>GHz</small></span>
           <b>IEEE 802.11 b/g/n</b>
           <span>اتصال مستقیم به مودم خانه، بدون هاب.</span>
           <div class="slp-wifi" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
-        <div class="slp-bento__c" data-reveal>
-          <span class="slp-num">۲۲۰<small>ولت ۵۰ هرتز</small></span>
+        <div class="slp-spot slp-bento__c" data-reveal>
+          <span class="slp-num"><span data-count="220">۲۲۰</span><small>ولت ۵۰ هرتز</small></span>
           <b>ولتاژ ورودی</b>
         </div>
-        <div class="slp-bento__c" data-reveal>
+        <div class="slp-spot slp-bento__c" data-reveal>
           <span class="slp-num">۰ تا ۴۰<small>°C</small></span>
           <b>دمای کاری</b>
         </div>
-        <div class="slp-bento__c slp-bento__c--size" data-reveal>
+        <div class="slp-spot slp-bento__c slp-bento__c--size" data-reveal>
           <span class="slp-num">۸۶×۸۶<small>میلی‌متر</small></span>
           <b>ابعاد پنل شیشه‌ای</b>
           <div class="slp-size" aria-hidden="true"><div class="slp-glass" data-panel-face="g1"></div></div>
         </div>
-        <div class="slp-bento__c slp-bento__c--note" data-reveal>
+        <div class="slp-spot slp-bento__c slp-bento__c--note" data-reveal>
           <span class="slp-num">N</span>
           <b>نیاز به سیم نول</b>
           <span>برای تغذیهٔ دائمی ماژول وای‌فای، سیم نول در محل نصب لازم است.</span>
@@ -288,27 +292,27 @@
     <div class="slp-wrap slp-faq__wrap">
       <h2 class="slp-h2" data-reveal>سؤالات پرتکرار</h2>
       <div class="slp-acc">
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>آیا برای نصب کلید هوشمند سارودی سیم نول لازم است؟</summary>
           <p>بله. ترمینال N روی همهٔ مدل‌ها وجود دارد و ماژول وای‌فای برای روشن ماندن دائمی به نول نیاز دارد.</p>
         </details>
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>کلیدهای سارودی در چه رنگ‌هایی عرضه می‌شوند؟</summary>
           <p>در دو رنگ مشکی و سفید، با همان آیکن‌های نورانی و ابعاد ۸۶×۸۶ میلی‌متر برای همهٔ مدل‌ها.</p>
         </details>
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>کلید با چه شبکه‌ای کار می‌کند؟</summary>
           <p>با وای‌فای ۲٫۴ گیگاهرتز استاندارد IEEE 802.11 b/g/n. شبکهٔ ۵ گیگاهرتز پشتیبانی نمی‌شود.</p>
         </details>
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>اگر اینترنت قطع شود چه اتفاقی می‌افتد؟</summary>
           <p>لمس پنل همچنان چراغ‌ها را روشن و خاموش می‌کند. کنترل از راه دور با برگشت اینترنت دوباره فعال می‌شود.</p>
         </details>
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>هر پل چه مقدار بار را تحمل می‌کند؟</summary>
           <p>هر پل تا ۲۲۰۰ وات در ولتاژ ۲۲۰ ولت ۵۰ هرتز.</p>
         </details>
-        <details data-reveal>
+        <details class="slp-spot" data-reveal>
           <summary>کلید کولر آبی چه کاری انجام می‌دهد؟</summary>
           <p>پمپ آب و دور تند و کند کولر را جداگانه کنترل می‌کند، از روی پنل یا از اپلیکیشن.</p>
         </details>

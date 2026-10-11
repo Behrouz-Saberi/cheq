@@ -33,7 +33,7 @@ function slab(w, h, r, depth, bevel, mats, hole) {
 }
 const gangMM = g => [(g.x / PANEL_SIZE - 0.5) * PANEL, -(g.y / PANEL_SIZE - 0.5) * PANEL];
 
-export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelEl, poster, reduced, onFirstFrame }) {
+export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelEl, poster, reduced, onFirstFrame, getProgress }) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -128,11 +128,11 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   label.rotation.y = Math.PI; label.position.z = -26.1 * MM; housing.add(label);
 
   const layers = [
-    { obj: glass,   z: 0,    ex: 46 },
-    { obj: touch,   z: -4.3, ex: 26 },
-    { obj: relay,   z: -24,  ex: 2 },
-    { obj: bezel,   z: -3.9, ex: 9 },
-    { obj: housing, z: -8.6, ex: -40 },
+    { obj: glass,   z: 0,    ex: 19 },
+    { obj: touch,   z: -4.3, ex: 11 },
+    { obj: relay,   z: -24,  ex: 4 },
+    { obj: bezel,   z: -3.9, ex: 4 },
+    { obj: housing, z: -8.6, ex: -15 },
   ];
   layers.forEach(l => { l.obj.position.z = l.z * MM; product.add(l.obj); });
   const labelLayers = [0, 1, 2, 4]; // which layer each DOM label points to
@@ -198,24 +198,31 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   }
   const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 
-  // keyframes at q = 0 (hero), .25, .5, .75, 1 (story steps)
+  /* Keyframes on the story's scroll progress q (0 = hero, 1 = last step).
+     at: where the pose is reached. Layers open only around 0.52 and are already back
+     together by 0.62 (while the panel keeps turning), so the parts never drift far apart. */
   const K = () => mobile ? [
-    { x: 0, y: 0.4, rx: 0.12, ry: 0.5, e: 0, s: 0.78 },
-    { x: 0, y: 0.3, rx: 0.04, ry: -0.12, e: 0, s: 1.0 },
-    { x: 0, y: 0.26, rx: 0.42, ry: -0.9, e: 1, s: 0.78 },
-    { x: 0, y: 0.3, rx: 0.08, ry: Math.PI - 0.3, e: 0.12, s: 0.95 },
-    { x: 0, y: 0.3, rx: 0.06, ry: Math.PI * 2 - 0.22, e: 0, s: 1.0 },
+    { at: 0,    x: 0, y: 0.4,  rx: 0.12, ry: 0.5,  e: 0, s: 0.78 },
+    { at: 0.28, x: 0, y: 0.3,  rx: 0.04, ry: -0.12, e: 0, s: 1.0 },
+    { at: 0.52, x: 0, y: 0.28, rx: 0.36, ry: -0.75, e: 1, s: 0.86 },
+    { at: 0.62, x: 0, y: 0.3,  rx: 0.24, ry: 0.6,  e: 0, s: 0.92 },
+    { at: 0.78, x: 0, y: 0.3,  rx: 0.08, ry: Math.PI - 0.3, e: 0, s: 0.95 },
+    { at: 1,    x: 0, y: 0.3,  rx: 0.06, ry: Math.PI * 2 - 0.22, e: 0, s: 1.0 },
   ] : [
-    { x: -0.66, y: -0.02, rx: 0.12, ry: 0.55, e: 0, s: 1.05 },
-    { x: -0.55, y: 0, rx: 0.04, ry: -0.14, e: 0, s: 1.18 },
-    { x: -0.5, y: 0.02, rx: 0.4, ry: -0.9, e: 1, s: 0.98 },
-    { x: -0.55, y: 0, rx: 0.08, ry: Math.PI - 0.32, e: 0.12, s: 1.12 },
-    { x: -0.55, y: 0, rx: 0.06, ry: Math.PI * 2 - 0.24, e: 0, s: 1.15 },
+    { at: 0,    x: -0.66, y: -0.02, rx: 0.12, ry: 0.55, e: 0, s: 1.05 },
+    { at: 0.28, x: -0.55, y: 0,    rx: 0.04, ry: -0.14, e: 0, s: 1.18 },
+    { at: 0.52, x: -0.52, y: 0.02, rx: 0.34, ry: -0.78, e: 1, s: 1.04 },
+    { at: 0.62, x: -0.54, y: 0,    rx: 0.22, ry: 0.55, e: 0, s: 1.08 },
+    { at: 0.78, x: -0.55, y: 0,    rx: 0.08, ry: Math.PI - 0.32, e: 0, s: 1.12 },
+    { at: 1,    x: -0.55, y: 0,    rx: 0.06, ry: Math.PI * 2 - 0.24, e: 0, s: 1.15 },
   ];
   function poseAt(q) {
-    const k = K(), f = clamp(q) * (k.length - 1), i = Math.min(k.length - 2, Math.floor(f)), t = ease(f - i);
-    const a = k[i], b = k[i + 1], o = {};
-    for (const key in a) o[key] = lerp(a[key], b[key], t);
+    const k = K(); q = clamp(q);
+    let i = 0; while (i < k.length - 2 && q > k[i + 1].at) i++;
+    const a = k[i], b = k[i + 1], t = ease(clamp((q - a.at) / (b.at - a.at))), o = {};
+    for (const key in a) if (key !== 'at') o[key] = lerp(a[key], b[key], t);
+    // closing is quicker than opening: once past the peak, layers snap home on a steep curve
+    if (a.e > b.e) o.e = a.e * Math.pow(1 - t, 2.2);
     return o;
   }
 
@@ -285,14 +292,15 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
   function frame(now) {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    const sr = scrolly.getBoundingClientRect(), vh = innerHeight;
-    const q = clamp(-sr.top / Math.max(1, sr.height - vh));
+    let q;
+    if (getProgress) q = clamp(getProgress());
+    else { const sr = scrolly.getBoundingClientRect(); q = clamp(-sr.top / Math.max(1, sr.height - innerHeight)); }
     lastQ = q;
     const held = now < holdUntil;
     if (!held && !reduced) idleT += dt;
 
     // story step 4: auto-cycle the family
-    const inFamily = q > 0.9;
+    const inFamily = q > 0.93;
     if (inFamily !== storyAuto) { storyAuto = inFamily; storyClock = 0; if (!inFamily) showModel(state.model); }
     if (storyAuto && !reduced) {
       storyClock += dt;
