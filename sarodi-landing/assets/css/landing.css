@@ -482,3 +482,31 @@ html.lenis, html.lenis body { height: auto; }
   .slp-band__track { animation: none; }
   .slp-btn::before { display: none; }
 }
+
+
+/* ---------- v1.2: consolidated chapters ---------- */
+/* experience: one controller column, wall panel or app */
+.slp-demo__grid { align-items: start; }
+.slp-ctl { display: grid; justify-items: center; gap: 18px; }
+.slp-ctl__switch { display: flex; gap: 4px; padding: 5px; border-radius: 999px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--line); }
+.slp-ctl__switch button { height: 40px; padding-inline: 20px; border-radius: 999px; font-size: 14px; color: var(--mu); transition: color .2s, background-color .25s; }
+.slp-ctl__switch button:hover { color: var(--tx); }
+.slp-ctl__switch button[aria-selected="true"] { background: var(--brand); color: #fff; }
+.slp-ctl__pane { display: grid; justify-items: center; gap: 16px; width: 100%; }
+.slp-ctl .slp-phone__body { width: min(100%, 300px); }
+.slp-applink { height: 44px; font-size: 14px; }
+.slp-perks { display: grid; gap: 12px; margin-top: 28px; }
+@media (min-width: 760px) { .slp-perks { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+.slp-perks li { display: grid; gap: 2px; padding: 16px 18px; border-radius: var(--r-sm); background: var(--surf); box-shadow: inset 0 0 0 1px var(--line); }
+.slp-perks b { font-size: 15px; }
+.slp-perks span { font-size: 13.5px; color: var(--mu); }
+.slp-link { color: var(--acc) !important; text-decoration: underline !important; text-underline-offset: 3px; }
+
+/* specs + install as one tabbed chapter */
+.slp-tech__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; }
+.slp-tabs--tech { margin-top: 0; }
+.slp-tech__panel { margin-top: 30px; }
+.slp-tech__panel .slp-bento { margin-top: 0; }
+.slp-tech__panel .slp-acc { margin-top: 22px; }
+.slp-tech__panel:not([hidden]) { animation: slp-fade .5s var(--ease); }
+@keyframes slp-fade { from { opacity: 0; transform: translateY(10px); } }

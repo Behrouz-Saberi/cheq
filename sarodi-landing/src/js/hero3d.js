@@ -203,17 +203,17 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
      together by 0.62 (while the panel keeps turning), so the parts never drift far apart. */
   const K = () => mobile ? [
     { at: 0,    x: 0, y: 0.4,  rx: 0.12, ry: 0.5,  e: 0, s: 0.78 },
-    { at: 0.28, x: 0, y: 0.3,  rx: 0.04, ry: -0.12, e: 0, s: 1.0 },
-    { at: 0.52, x: 0, y: 0.28, rx: 0.36, ry: -0.75, e: 1, s: 0.86 },
-    { at: 0.62, x: 0, y: 0.3,  rx: 0.24, ry: 0.6,  e: 0, s: 0.92 },
-    { at: 0.78, x: 0, y: 0.3,  rx: 0.08, ry: Math.PI - 0.3, e: 0, s: 0.95 },
+    { at: 0.36, x: 0, y: 0.3,  rx: 0.04, ry: -0.12, e: 0, s: 1.0 },
+    { at: 0.66, x: 0, y: 0.28, rx: 0.36, ry: -0.75, e: 1, s: 0.86 },
+    { at: 0.75, x: 0, y: 0.3,  rx: 0.24, ry: 0.6,  e: 0, s: 0.92 },
+    { at: 0.87, x: 0, y: 0.3,  rx: 0.08, ry: Math.PI - 0.3, e: 0, s: 0.95 },
     { at: 1,    x: 0, y: 0.3,  rx: 0.06, ry: Math.PI * 2 - 0.22, e: 0, s: 1.0 },
   ] : [
     { at: 0,    x: -0.66, y: -0.02, rx: 0.12, ry: 0.55, e: 0, s: 1.05 },
-    { at: 0.28, x: -0.55, y: 0,    rx: 0.04, ry: -0.14, e: 0, s: 1.18 },
-    { at: 0.52, x: -0.52, y: 0.02, rx: 0.34, ry: -0.78, e: 1, s: 1.04 },
-    { at: 0.62, x: -0.54, y: 0,    rx: 0.22, ry: 0.55, e: 0, s: 1.08 },
-    { at: 0.78, x: -0.55, y: 0,    rx: 0.08, ry: Math.PI - 0.32, e: 0, s: 1.12 },
+    { at: 0.36, x: -0.55, y: 0,    rx: 0.04, ry: -0.14, e: 0, s: 1.18 },
+    { at: 0.66, x: -0.52, y: 0.02, rx: 0.34, ry: -0.78, e: 1, s: 1.04 },
+    { at: 0.75, x: -0.54, y: 0,    rx: 0.22, ry: 0.55, e: 0, s: 1.08 },
+    { at: 0.87, x: -0.55, y: 0,    rx: 0.08, ry: Math.PI - 0.32, e: 0, s: 1.12 },
     { at: 1,    x: -0.55, y: 0,    rx: 0.06, ry: Math.PI * 2 - 0.24, e: 0, s: 1.15 },
   ];
   function poseAt(q) {
@@ -300,8 +300,8 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
     if (!held && !reduced) idleT += dt;
 
     // story step 4: auto-cycle the family
-    const inFamily = q > 0.93;
-    if (inFamily !== storyAuto) { storyAuto = inFamily; storyClock = 0; if (!inFamily) showModel(state.model); }
+    const inFamily = q > 0.95;
+    if (inFamily !== storyAuto) { storyAuto = inFamily; storyClock = 1.2; if (!inFamily) showModel(state.model); }
     if (storyAuto && !reduced) {
       storyClock += dt;
       if (storyClock > 1.9) { storyClock = 0; storyIdx = (storyIdx + 1) % STORY_MODELS.length; showModel(STORY_MODELS[storyIdx]); }

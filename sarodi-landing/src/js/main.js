@@ -202,8 +202,32 @@ function boot() {
   const nav = $('[data-nav]');
   new IntersectionObserver(([en]) => nav.classList.toggle('is-solid', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.slp-hero__copy'));
 
-  /* ---------- scroll + motion (Lenis, ScrollTrigger) ---------- */
   let motion = null;
+  /* ---------- tab helper (wall panel / app, specs / install) ---------- */
+  function tabs(buttons, show) {
+    const pick = btn => {
+      buttons.forEach(b => { const on = b === btn; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+      show(btn); motion && motion.refresh();
+    };
+    buttons.forEach((b, i) => {
+      b.addEventListener('click', () => pick(b));
+      b.addEventListener('keydown', e => {
+        const d = e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowRight' ? -1 : 0; // RTL: left = next
+        if (!d) return; e.preventDefault();
+        const n = buttons[(i + d + buttons.length) % buttons.length]; n.focus(); pick(n);
+      });
+    });
+  }
+  const ctl = $('[data-ctl]');
+  tabs($$('[data-ctl-tab]'), btn => {
+    ctl.dataset.ctl = btn.dataset.ctlTab;
+    $$('[data-ctl-pane]').forEach(p => (p.hidden = p.dataset.ctlPane !== btn.dataset.ctlTab));
+  });
+  tabs($$('[data-tech-tabs] [role="tab"]'), btn => {
+    $$('#slp-tech [role="tabpanel"]').forEach(p => (p.hidden = p.id !== btn.getAttribute('aria-controls')));
+  });
+
+  /* ---------- scroll + motion (Lenis, ScrollTrigger) ---------- */
   try { motion = initMotion(root, { reduced }); } catch (err) { console.warn('[sarodi] motion disabled', err); }
 
   /* ---------- WebGL (lazy) ---------- */

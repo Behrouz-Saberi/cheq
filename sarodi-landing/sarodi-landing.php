@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sarodi Smart Switch Landing
  * Description: لندینگ سه‌بعدی و تعاملی کلیدهای هوشمند سارودی. استفاده: شورت‌کد [sarodi_landing] یا قالب برگه «Sarodi Landing (تمام‌صفحه)».
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      Imenab Digital Marketing
  * Text Domain: sarodi-landing
  * Requires PHP: 7.4
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SARODI_LP_VER', '1.1.0' );
+define( 'SARODI_LP_VER', '1.2.0' );
 define( 'SARODI_LP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
 
