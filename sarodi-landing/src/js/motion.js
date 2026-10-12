@@ -63,12 +63,14 @@ export function initMotion(root, { reduced }) {
 
     /* hero entrance */
     const h1 = $('.slp-h1');
-    const words = splitWords(h1);
-    gsap.timeline({ defaults: { ease: 'expo.out' } })
-      .from('.slp-hero .slp-eyebrow', { y: 16, autoAlpha: 0, duration: 0.8 })
-      .from(words, { yPercent: 115, duration: 1.1, stagger: 0.06 }, '<0.1')
-      .from(['.slp-hero .slp-lead', '.slp-hero__ctas'], { y: 22, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, '<0.35')
-      .from('.slp-hero__models', { y: 18, autoAlpha: 0, duration: 0.9 }, '<0.15');
+    const words = h1 ? splitWords(h1) : [];
+    const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    const pick = sel => [...root.querySelectorAll(sel)];
+    if (pick('.slp-hero__copy .slp-eyebrow').length) intro.from(pick('.slp-hero__copy .slp-eyebrow'), { y: 16, autoAlpha: 0, duration: 0.8 });
+    intro.from(words, { yPercent: 115, duration: 1.1, stagger: 0.06 }, '<0.1');
+    const rest = pick('.slp-hero__copy .slp-lead, .slp-hero__copy .slp-hero__ctas');
+    if (rest.length) intro.from(rest, { y: 22, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, '<0.35');
+    if (pick('.slp-hero__models').length) intro.from(pick('.slp-hero__models'), { y: 18, autoAlpha: 0, duration: 0.9 }, '<0.15');
 
     /* section headings: words rise as they enter */
     $$('.slp-sec .slp-h2, .slp-step .slp-h2').forEach(h => {
@@ -84,7 +86,7 @@ export function initMotion(root, { reduced }) {
     });
 
     /* product family: pinned horizontal gallery on desktop */
-    if (desktop) {
+    if (desktop && root.dataset.design !== 'c') {
       const sec = $('#slp-family'), rail = $('[data-rail]'), list = rail && rail.querySelector('.slp-rail__list');
       if (sec && list) {
         sec.classList.add('is-pinned');

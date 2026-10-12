@@ -33,7 +33,7 @@ function slab(w, h, r, depth, bevel, mats, hole) {
 }
 const gangMM = g => [(g.x / PANEL_SIZE - 0.5) * PANEL, -(g.y / PANEL_SIZE - 0.5) * PANEL];
 
-export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelEl, poster, reduced, onFirstFrame, getProgress }) {
+export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelEl, poster, reduced, onFirstFrame, getProgress, centered = false, heroPose = null }) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -216,8 +216,15 @@ export function initHero({ canvas, stage, scrolly, labelsEl, hintEl, storyModelE
     { at: 0.87, x: -0.55, y: 0,    rx: 0.08, ry: Math.PI - 0.32, e: 0, s: 1.12 },
     { at: 1,    x: -0.55, y: 0,    rx: 0.06, ry: Math.PI * 2 - 0.24, e: 0, s: 1.15 },
   ];
+  /* design variants: C shows the model centred in a tile, B starts it centred under the headline */
+  const keys = () => {
+    let k = K();
+    if (centered) k = k.map(p => ({ ...p, x: 0, y: -0.04, s: p.s * 1.32 }));
+    else if (heroPose && !mobile) k = [{ ...k[0], ...heroPose }, ...k.slice(1)];
+    return k;
+  };
   function poseAt(q) {
-    const k = K(); q = clamp(q);
+    const k = keys(); q = clamp(q);
     let i = 0; while (i < k.length - 2 && q > k[i + 1].at) i++;
     const a = k[i], b = k[i + 1], t = ease(clamp((q - a.at) / (b.at - a.at))), o = {};
     for (const key in a) if (key !== 'at') o[key] = lerp(a[key], b[key], t);

@@ -151,6 +151,8 @@ function boot() {
     $$('[data-finish]').forEach(b => b.setAttribute('aria-checked', b.dataset.finish === state.finish));
   }
 
+  if (root.dataset.defaultFinish) setFinish(root.dataset.defaultFinish, 'init');
+
   function syncAll() { syncFinish(); syncPanel(); syncTabs(); syncStatus(); syncWiring(); syncAmbient(); renderApp(); }
   subscribe((s, src) => {
     syncAll(); ensureMotor();
@@ -178,8 +180,8 @@ function boot() {
     motion ? motion.scrollToEl($('#slp-demo')) : $('#slp-demo').scrollIntoView({ block: 'start' });
   });
   const railStep = dir => rail.scrollBy({ left: dir * Math.min(360, rail.clientWidth * 0.8), behavior: reduced ? 'auto' : 'smooth' });
-  $('[data-rail-prev]').addEventListener('click', () => railStep(1));
-  $('[data-rail-next]').addEventListener('click', () => railStep(-1));
+  $('[data-rail-prev]')?.addEventListener('click', () => railStep(1));
+  $('[data-rail-next]')?.addEventListener('click', () => railStep(-1));
   // desktop tilt on cards (pointer: fine only)
   if (matchMedia('(pointer: fine)').matches && !reduced) {
     rail.addEventListener('pointermove', e => {
@@ -200,7 +202,7 @@ function boot() {
 
   /* ---------- nav state ---------- */
   const nav = $('[data-nav]');
-  new IntersectionObserver(([en]) => nav.classList.toggle('is-solid', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.slp-hero__copy'));
+  new IntersectionObserver(([en]) => nav.classList.toggle('is-solid', !en.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe($('.slp-hero__copy') || $('section'));
 
   let motion = null;
   /* ---------- tab helper (wall panel / app, specs / install) ---------- */
@@ -220,7 +222,7 @@ function boot() {
   }
   const ctl = $('[data-ctl]');
   tabs($$('[data-ctl-tab]'), btn => {
-    ctl.dataset.ctl = btn.dataset.ctlTab;
+    if (ctl) ctl.dataset.ctl = btn.dataset.ctlTab;
     $$('[data-ctl-pane]').forEach(p => (p.hidden = p.dataset.ctlPane !== btn.dataset.ctlTab));
   });
   tabs($$('[data-tech-tabs] [role="tab"]'), btn => {
@@ -229,6 +231,18 @@ function boot() {
 
   /* ---------- scroll + motion (Lenis, ScrollTrigger) ---------- */
   try { motion = initMotion(root, { reduced }); } catch (err) { console.warn('[sarodi] motion disabled', err); }
+
+  /* ---------- design C: the 3D tile is driven by view buttons, not by scroll ---------- */
+  const design = root.dataset.design || 'a';
+  const view = { q: 0.36 };
+  $$('[data-view]').forEach(b => b.addEventListener('click', () => {
+    $$('[data-view]').forEach(x => x.setAttribute('aria-selected', x === b));
+    const to = +b.dataset.view;
+    if (reduced) { view.q = to; return; }
+    const from = view.q, t0 = performance.now(), dur = 1300;
+    const step = now => { const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; view.q = from + (to - from) * e; if (t < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }));
 
   /* ---------- WebGL (lazy) ---------- */
   const glOK = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
@@ -239,7 +253,9 @@ function boot() {
         canvas: $('[data-hero-canvas]'), stage, scrolly: $('[data-scrolly]'), labelsEl: $('[data-layer-labels]'),
         hintEl: $('[data-hint]'), storyModelEl: $('[data-story-model]'), reduced,
         onFirstFrame: () => { stage.classList.add('is-3d'); motion && motion.refresh(); },
-        getProgress: motion ? motion.getProgress : null,
+        getProgress: design === 'c' ? () => view.q : motion ? motion.getProgress : null,
+        centered: design === 'c',
+        heroPose: design === 'b' ? { x: 0, y: -0.52, s: 0.64, rx: 0.2, ry: 0.32 } : null,
       });
     }).catch(err => { console.warn('[sarodi] hero 3D disabled', err); stage.classList.add('is-static'); });
     ('requestIdleCallback' in window) ? requestIdleCallback(loadHero, { timeout: 600 }) : setTimeout(loadHero, 120);

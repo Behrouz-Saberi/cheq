@@ -29,7 +29,8 @@ const bundle = read('assets/js/sarodi.bundle.js');
 const TITLE = 'کلید هوشمند سارودی | Sarodi Smart Switch';
 const DESC = 'کلید هوشمند لمسی وای‌فای سارودی با پنل شیشه‌ای ۸۶×۸۶، تا ۲۲۰۰ وات برای هر پل؛ مدل‌های یک تا چهار پل، پرده برقی و کولر آبی. کنترل از موبایل و سناریوهای هوشمند.';
 const fill = (html, A) => html.replaceAll('{{A}}', A).replaceAll('{{CTA}}', '#slp-contact').replaceAll('{{TEL}}', 'tel:03133120').replaceAll('{{CLS}}', '');
-const tpl = read('templates/landing.html');
+const DESIGNS = { a: 'templates/landing.html', b: 'templates/landing-b.html', c: 'templates/landing-c.html' };
+const tpl = read(DESIGNS.a);
 const head = extra => `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${TITLE}</title>
@@ -44,21 +45,32 @@ const staticHtml = page(
   '<link rel="preload" href="assets/fonts/Vazirmatn-wght.woff2" as="font" type="font/woff2" crossorigin>\n<link rel="stylesheet" href="assets/css/landing.css">',
   fill(tpl, 'assets'));
 writeFileSync(join(here, 'index.html'), staticHtml);
+for (const d of ['b', 'c']) writeFileSync(join(here, `index-${d}.html`), page('<link rel="preload" href="assets/fonts/Vazirmatn-wght.woff2" as="font" type="font/woff2" crossorigin>\n<link rel="stylesheet" href="assets/css/landing.css">', fill(read(DESIGNS[d]), 'assets')));
 
 /* 2) single self-contained file */
 const font = `url(data:font/woff2;base64,${b64('assets/fonts/Vazirmatn-wght.woff2')}) format("woff2")`;
 const css = read('assets/css/landing.css').replace(/src:\s*url\("\.\.\/fonts\/Vazirmatn-wght\.woff2"\)[^;]*;/, `src: ${font};`);
-let inl = fill(tpl, '__A__')
+const singleOf = t => {
+let inl = fill(t, '__A__')
   .replace(/__A__\/img\/([\w-]+\.svg)/g, (_, f) => `data:image/svg+xml;base64,${b64('assets/img/' + f)}`);
 const safeJs = bundle.replace(/<\/script/gi, '<\\/script').replace(/<!--/g, '<\\!--');
 inl = inl.replace(/<script defer src="__A__\/js\/sarodi\.bundle\.js"><\/script>/, () => `<script>${safeJs}</script>`); // function form: bundle text may contain $' / $& patterns
 if (inl.includes('__A__')) throw new Error('unresolved asset path in single-file build');
-const singleBody = `<style>${css}</style>\n${inl}`;
+return `<style>${css}</style>\n${inl}`;
+};
+const singleBody = singleOf(tpl);
 
 /* 3) release packages */
 rmSync(rel, { recursive: true, force: true }); mkdirSync(rel, { recursive: true });
 writeFileSync(join(rel, 'sarodi-landing-single.html'), page('', singleBody));
-if (process.env.ARTIFACT_OUT) writeFileSync(process.env.ARTIFACT_OUT, `<title>Sarodi Smart Switch</title>\n<style>:root{color-scheme:dark;background:#05090b}body{background:#05090b}</style>\n${singleBody}\n`);
+for (const d of ['b', 'c']) writeFileSync(join(rel, `sarodi-landing-single-${d}.html`), page('', singleOf(read(DESIGNS[d]))));
+if (process.env.ARTIFACT_OUT) {
+  const bg = { a: '#05090b', b: '#f1f4f5', c: '#0e0f10' }, cs = { a: 'dark', b: 'light', c: 'dark' }, names = { a: 'Sarodi Smart Switch', b: 'Sarodi Atelier', c: 'Sarodi Control Center' };
+  for (const d of ['a', 'b', 'c']) {
+    const out = d === 'a' ? process.env.ARTIFACT_OUT : process.env.ARTIFACT_OUT.replace(/\.html$/, `-${d}.html`);
+    writeFileSync(out, `<title>${names[d]}</title>\n<style>:root{color-scheme:${cs[d]};background:${bg[d]}}body{background:${bg[d]}}</style>\n${d === 'a' ? singleBody : singleOf(read(DESIGNS[d]))}\n`);
+  }
+}
 
 const tmp = join(rel, '_tmp'); mkdirSync(tmp);
 // WP plugin: only runtime files (no sources/build tooling)
@@ -66,7 +78,7 @@ const wp = join(tmp, 'sarodi-landing'); mkdirSync(wp);
 for (const f of ['sarodi-landing.php', 'README.md', 'templates', 'assets']) cpSync(join(here, f), join(wp, f), { recursive: true });
 // static site
 const st = join(tmp, 'sarodi-static'); mkdirSync(st);
-cpSync(join(here, 'index.html'), join(st, 'index.html'));
+for (const f of ['index.html', 'index-b.html', 'index-c.html']) cpSync(join(here, f), join(st, f));
 cpSync(join(here, 'assets'), join(st, 'assets'), { recursive: true });
 execSync(`cd "${tmp}" && zip -qr9 ../sarodi-landing-wp-plugin.zip sarodi-landing && cd sarodi-static && zip -qr9 ../../sarodi-landing-static.zip .`);
 rmSync(tmp, { recursive: true, force: true });

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sarodi Smart Switch Landing
  * Description: لندینگ سه‌بعدی و تعاملی کلیدهای هوشمند سارودی. استفاده: شورت‌کد [sarodi_landing] یا قالب برگه «Sarodi Landing (تمام‌صفحه)».
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      Imenab Digital Marketing
  * Text Domain: sarodi-landing
  * Requires PHP: 7.4
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SARODI_LP_VER', '1.2.0' );
+define( 'SARODI_LP_VER', '1.3.0' );
 define( 'SARODI_LP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
 
@@ -23,6 +23,7 @@ define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
  *  cta – link for every «استعلام قیمت» button (default: #slp-contact)
  *  tel – phone link (default: tel:03133120)
  *  nav – "1" shows the landing's own top bar inside a theme page (default "0": the theme header is used)
+ *  design – "a" (default, dark scroll story), "b" (Atelier, light) or "c" (Control Center, bento)
  *
  * $embedded = true when rendered inside a theme page (shortcode / Elementor): the landing
  * breaks out to full width and drops its fixed nav. The full-canvas template passes false.
@@ -30,9 +31,10 @@ define( 'SARODI_LP_URL', plugin_dir_url( __FILE__ ) );
 function sarodi_lp_render( $atts = array(), $embedded = true ) {
 	$atts = shortcode_atts(
 		array(
-			'cta' => '#slp-contact',
-			'tel' => 'tel:03133120',
-			'nav' => '0',
+			'cta'    => '#slp-contact',
+			'tel'    => 'tel:03133120',
+			'nav'    => '0',
+			'design' => 'a',
 		),
 		$atts,
 		'sarodi_landing'
@@ -47,7 +49,9 @@ function sarodi_lp_render( $atts = array(), $embedded = true ) {
 
 	wp_enqueue_style( 'sarodi-landing', SARODI_LP_URL . 'assets/css/landing.css', array(), SARODI_LP_VER );
 
-	$html = file_get_contents( SARODI_LP_DIR . 'templates/landing.html' );
+	$files  = array( 'a' => 'landing.html', 'b' => 'landing-b.html', 'c' => 'landing-c.html' );
+	$design = isset( $files[ $atts['design'] ] ) ? $atts['design'] : 'a';
+	$html   = file_get_contents( SARODI_LP_DIR . 'templates/' . $files[ $design ] );
 	if ( false === $html ) {
 		return '';
 	}
@@ -84,7 +88,16 @@ function sarodi_lp_is_landing() {
 	if ( ! $post ) {
 		return false;
 	}
-	return 'sarodi-landing-canvas' === get_page_template_slug( $post ) || has_shortcode( $post->post_content, 'sarodi_landing' );
+	return 0 === strpos( (string) get_page_template_slug( $post ), 'sarodi-landing-canvas' ) || has_shortcode( $post->post_content, 'sarodi_landing' );
+}
+
+/* Which design the current canvas page uses (a / b / c). */
+function sarodi_lp_canvas_design() {
+	$slug = (string) get_page_template_slug( get_queried_object_id() );
+	if ( 'sarodi-landing-canvas-b' === $slug ) {
+		return 'b';
+	}
+	return 'sarodi-landing-canvas-c' === $slug ? 'c' : 'a';
 }
 
 /* Enqueue CSS in <head> (no flash of unstyled content). */
@@ -106,7 +119,8 @@ add_action(
 		}
 		echo '<link rel="preload" href="' . esc_url( SARODI_LP_URL . 'assets/fonts/Vazirmatn-wght.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
 		echo '<link rel="preload" href="' . esc_url( SARODI_LP_URL . 'assets/js/sarodi.bundle.js?ver=' . SARODI_LP_VER ) . '" as="script">' . "\n";
-		echo '<meta name="theme-color" content="#05090b">' . "\n";
+		$sarodi_lp_bg = array( 'a' => '#05090b', 'b' => '#f1f4f5', 'c' => '#0e0f10' );
+		echo '<meta name="theme-color" content="' . esc_attr( $sarodi_lp_bg[ sarodi_lp_canvas_design() ] ) . '">' . "\n";
 	},
 	1
 );
@@ -115,7 +129,9 @@ add_action(
 add_filter(
 	'theme_page_templates',
 	function ( $templates ) {
-		$templates['sarodi-landing-canvas'] = 'Sarodi Landing (تمام‌صفحه)';
+		$templates['sarodi-landing-canvas']   = 'Sarodi Landing A (تمام‌صفحه، تیره)';
+		$templates['sarodi-landing-canvas-b'] = 'Sarodi Landing B (تمام‌صفحه، روشن)';
+		$templates['sarodi-landing-canvas-c'] = 'Sarodi Landing C (تمام‌صفحه، بنتو)';
 		return $templates;
 	}
 );
@@ -123,7 +139,7 @@ add_filter(
 add_filter(
 	'template_include',
 	function ( $template ) {
-		if ( is_singular() && 'sarodi-landing-canvas' === get_page_template_slug( get_queried_object_id() ) ) {
+		if ( is_singular() && 0 === strpos( (string) get_page_template_slug( get_queried_object_id() ), 'sarodi-landing-canvas' ) ) {
 			return SARODI_LP_DIR . 'templates/page-canvas.php';
 		}
 		return $template;
