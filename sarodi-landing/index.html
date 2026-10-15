@@ -14,6 +14,12 @@
 <!-- Sarodi Smart Switch Landing markup. Placeholders: A = assets base URL, CTA = price-inquiry link, TEL = phone link, CLS = mode classes -->
 <div class="slp" id="slp" dir="rtl" lang="fa">
 
+  <!-- PRELOADER: hidden unless JS is running (.slp.js), removed after the intro -->
+  <div class="slp-pre" data-preloader aria-hidden="true">
+    <svg class="slp-pre__glyph" viewBox="115.4 116.4 12.7 10.8"><path pathLength="1" d="M 116.11,122.69 C 116.11,122.70 116.11,122.71 116.11,122.72 L 119.89,122.72 C 119.89,124.80 121.58,126.5 123.66,126.5 C 125.73,126.5 127.41,124.83 127.44,122.77 C 127.44,122.75 127.44,122.74 127.44,122.72 C 127.44,122.70 127.44,122.69 127.44,122.67 C 127.41,119.57 124.89,117.05 121.78,117.05 C 118.66,117.05 116.12,119.58 116.11,122.69"/></svg>
+    <div class="slp-pre__bar"><i data-preloader-bar></i></div>
+  </div>
+
   <!-- ===== NAV ===== -->
   <header class="slp-nav" data-nav>
     <div class="slp-nav__in">
@@ -46,6 +52,11 @@
         <span data-l="2">رله و ماژول Wi-Fi</span>
         <span data-l="3">قاب و بدنهٔ نصب</span>
       </div>
+      <ol class="slp-chapters" aria-label="فصل‌های معرفی">
+        <li data-chapter="0"><i></i>شیشه</li>
+        <li data-chapter="1"><i></i>درون کلید</li>
+        <li data-chapter="2"><i></i>خانواده</li>
+      </ol>
       <div class="slp-hint" data-hint><span class="slp-hint__ring"></span>روی کلید بزن</div>
     </div>
 
@@ -57,7 +68,7 @@
           <h1 class="slp-h1">خانه، با یک لمس<br><span class="slp-grad">هوشمند</span> می‌شود</h1>
           <p class="slp-lead">یک پنل شیشه‌ای لمسی که چراغ، پرده و کولر را روی دیوار و در موبایل شما کنترل می‌کند.</p>
           <div class="slp-hero__ctas">
-            <a class="slp-btn" href="#slp-contact" data-cta>استعلام قیمت</a>
+            <a class="slp-btn slp-btn--beam" href="#slp-contact" data-cta>استعلام قیمت</a>
             <a class="slp-btn slp-btn--ghost" href="#slp-demo">امتحانش کن</a>
           </div>
         </div>

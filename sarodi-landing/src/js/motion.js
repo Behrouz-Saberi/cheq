@@ -16,7 +16,9 @@ const faDigits = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 function splitWords(el) {
   if (el.dataset.split) return [...el.querySelectorAll('.slp-w > span')];
   el.dataset.split = '1';
-  const wrap = node => { const o = document.createElement('span'); o.className = 'slp-w'; const i = document.createElement('span'); o.appendChild(i); i.appendChild(node); return o; };
+  // screen readers keep one clean name; the split words are decoration
+  el.setAttribute('aria-label', [...el.childNodes].map(n => (n.nodeName === 'BR' ? ' ' : n.textContent)).join('').replace(/\s+/g, ' ').trim());
+  const wrap = node => { const o = document.createElement('span'); o.className = 'slp-w'; o.setAttribute('aria-hidden', 'true'); const i = document.createElement('span'); o.appendChild(i); i.appendChild(node); return o; };
   [...el.childNodes].forEach(node => {
     if (node.nodeType === 3) {
       const frag = document.createDocumentFragment();
@@ -49,10 +51,20 @@ export function initMotion(root, { reduced }) {
   const scrollToEl = el => (lenis ? lenis.scrollTo(el, { offset: -72 }) : el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }));
 
   /* ---- 3D story progress (scrub smooths the scroll into the model's pose) ---- */
-  const bar = $('[data-story-bar]');
+  const bar = $('[data-story-bar]'), stage = $('[data-stage]'), chapters = $$('[data-chapter]');
+  let activeCh = -2;
+  const syncStory = () => {
+    const q = story.q;
+    if (bar) bar.style.transform = `scaleX(${q.toFixed(4)})`;
+    if (stage) stage.style.setProperty('--q', q.toFixed(3));
+    // chapter rail: hero, then glass / inside / family
+    const ch = q < 0.16 ? -1 : q < 0.52 ? 0 : q < 0.86 ? 1 : 2;
+    if (ch !== activeCh) { activeCh = ch; chapters.forEach((c, i) => c.classList.toggle('is-on', i === ch)); }
+  };
+  syncStory();
   gsap.to(story, {
     q: 1, ease: 'none',
-    onUpdate: () => bar && (bar.style.transform = `scaleX(${story.q.toFixed(4)})`),
+    onUpdate: syncStory,
     scrollTrigger: { trigger: $('[data-scrolly]'), start: 'top top', end: 'bottom bottom', scrub: reduced ? true : 0.55 },
   });
 
@@ -64,18 +76,37 @@ export function initMotion(root, { reduced }) {
     /* hero entrance */
     const h1 = $('.slp-h1');
     const words = h1 ? splitWords(h1) : [];
-    const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    const intro = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
     const pick = sel => [...root.querySelectorAll(sel)];
     if (pick('.slp-hero__copy .slp-eyebrow').length) intro.from(pick('.slp-hero__copy .slp-eyebrow'), { y: 16, autoAlpha: 0, duration: 0.8 });
-    intro.from(words, { yPercent: 115, duration: 1.1, stagger: 0.06 }, '<0.1');
+    intro.from(words, { yPercent: 115, autoAlpha: 0, filter: 'blur(8px)', duration: 1.1, stagger: 0.06 }, '<0.1');
     const rest = pick('.slp-hero__copy .slp-lead, .slp-hero__copy .slp-hero__ctas');
     if (rest.length) intro.from(rest, { y: 22, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, '<0.35');
     if (pick('.slp-hero__models').length) intro.from(pick('.slp-hero__models'), { y: 18, autoAlpha: 0, duration: 0.9 }, '<0.15');
 
+    /* preloader: the brand glyph draws itself, the curtain lifts, then the hero plays.
+       Hard cap at 2.4 s so a slow device never waits behind it. */
+    // runs as CSS animations (compositor), so heavy start-up work can't make it skip frames
+    const pre = $('[data-preloader]');
+    if (pre) {
+      let done = false;
+      const finish = () => { if (done) return; done = true; pre.remove(); intro.play(); };
+      pre.addEventListener('animationend', e => e.animationName === 'slp-lift' && finish());
+      setTimeout(finish, 2800);
+    } else intro.play();
+
+    /* experience: the room settles into frame as it arrives */
+    $$('.slp-room').forEach(r => gsap.fromTo(r, { scale: 1.07, autoAlpha: 0.4 }, { scale: 1, autoAlpha: 1, ease: 'none',
+      scrollTrigger: { trigger: r, start: 'top bottom', end: 'top 35%', scrub: 1 } }));
+
+    /* footer rises out from behind the last section */
+    $$('.slp-foot').forEach(f => gsap.fromTo(f, { yPercent: -30, autoAlpha: 0.6 }, { yPercent: 0, autoAlpha: 1, ease: 'none',
+      scrollTrigger: { trigger: f, start: 'top bottom', end: 'top 70%', scrub: 1 } }));
+
     /* section headings: words rise as they enter */
     $$('.slp-sec .slp-h2, .slp-step .slp-h2').forEach(h => {
       const w = splitWords(h);
-      gsap.from(w, { yPercent: 115, duration: 1, ease: 'expo.out', stagger: 0.05, scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
+      gsap.from(w, { yPercent: 115, autoAlpha: 0, filter: 'blur(6px)', duration: 1, ease: 'expo.out', stagger: 0.05, scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
     });
 
     /* count-ups on spec numbers */

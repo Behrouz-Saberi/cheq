@@ -25,6 +25,8 @@ const IC = {
 const icon = (n, cls = '') => `<svg class="slp-i ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
 
 function boot() {
+  root.classList.add('js');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) root.querySelector('[data-preloader]')?.remove();
   const $ = (s, el = root) => el.querySelector(s);
   const $$ = (s, el = root) => [...el.querySelectorAll(s)];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -231,6 +233,7 @@ function boot() {
 
   /* ---------- scroll + motion (Lenis, ScrollTrigger) ---------- */
   try { motion = initMotion(root, { reduced }); } catch (err) { console.warn('[sarodi] motion disabled', err); }
+  setTimeout(() => root.querySelector('[data-preloader]')?.remove(), 3500); // never let the curtain stay down
 
   /* ---------- design C: the 3D tile is driven by view buttons, not by scroll ---------- */
   const design = root.dataset.design || 'a';
